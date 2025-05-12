@@ -132,11 +132,12 @@ export default function Editor({
 	// @ts-ignore
 	return (
 		<div>
-			<p className='text-lg font-semibold text-primary mb-2'>Контент лекции</p>
-
-			<div className='mb-4'>
+			<div className='mb-4 flex justify-between'>
 				<Button onClick={insertHr} className='mr-2'>
 					Добавить разделитель страницы
+				</Button>
+				<Button className='' onClick={saveContent}>
+					Сохранить изменения
 				</Button>
 			</div>
 
@@ -148,10 +149,6 @@ export default function Editor({
 				height={400} // Устанавливаем высоту редактора
 				toolbarsExclude={toolbarsExclude} // Применяем исключение кнопок
 			/>
-
-			<Button className='w-full mt-4' onClick={saveContent}>
-				Сохранить
-			</Button>
 		</div>
 	)
 }

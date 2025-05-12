@@ -8,7 +8,15 @@ import { toast } from 'sonner'
 import Cookies from 'js-cookie'
 import { observer } from 'mobx-react'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { ArrowLeft, Download, PanelLeft, Trash2, X } from 'lucide-react'
+import {
+	ArrowLeft,
+	Download,
+	Edit,
+	MessageCircle,
+	PanelLeft,
+	Trash2,
+	X,
+} from 'lucide-react'
 
 import Head from 'next/head'
 import Link from 'next/link'
@@ -116,7 +124,20 @@ const Ask = observer(({ ask }) => {
 
 		try {
 			const token = Cookies.get('users_access_token')
-			await editTitleAsk(token, askData?.module_id, askId, title)
+			// Передаем текущий объект askData, чтобы сохранить ответы
+			const updatedAsk = await editTitleAsk(
+				token,
+				askData?.module_id,
+				askId,
+				title,
+				askData // Передаем весь объект askData, чтобы сохранить ответы и другие данные
+			)
+
+			// Обновляем данные вопроса в store напрямую
+			StoreAsks.setAsk({
+				...askData,
+				title: title,
+			})
 
 			toast.success('Название вопроса изменено!', {
 				id: toastId,
@@ -135,6 +156,7 @@ const Ask = observer(({ ask }) => {
 
 			reset()
 
+			// Обновляем каталог и вопрос в фоне
 			StoreCatalog.loading().then()
 			if (askId) {
 				await StoreAsks.getAsk(askId).then()
@@ -209,36 +231,23 @@ const Ask = observer(({ ask }) => {
 				<AppSidebar />
 
 				<SidebarInset>
-					<header className='flex h-16 shrink-0 items-center gap-2 border-b px-4'>
+					<header className='sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-white shadow-sm'>
 						<Button
 							variant='ghost'
 							size='icon'
-							className={cn('h-7 w-7 flex items-center justify-center')}
+							className='h-8 w-8 flex items-center justify-center'
 							onClick={router.back}
 						>
-							<ArrowLeft
-								className={cn(
-									'z-20 hidden w-4 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex',
-									'[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize',
-									'[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize',
-									'group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full group-data-[collapsible=offcanvas]:hover:bg-sidebar',
-									'[[data-side=left][data-collapsible=offcanvas]_&]:-right-2',
-									'[[data-side=right][data-collapsible=offcanvas]_&]:-left-2'
-								)}
-							/>
+							<ArrowLeft className='h-4 w-4' />
 						</Button>
 
 						<Separator orientation='vertical' className='mr-2 h-4' />
 
-						<SidebarTrigger className='-ml-1' />
+						<SidebarTrigger className='-ml-1 text-green-600 hover:text-green-700 hover:bg-green-50' />
 
 						<Separator orientation='vertical' className='mr-2 h-4' />
 
-						<div
-							className={
-								'w-full flex flex-row justify-between items-center gap-4'
-							}
-						>
+						<div className='w-full flex flex-row justify-between items-center gap-4'>
 							<Breadcrumb>
 								<BreadcrumbList>
 									<BreadcrumbItem className='hidden md:block'>
@@ -266,19 +275,25 @@ const Ask = observer(({ ask }) => {
 							</Breadcrumb>
 						</div>
 					</header>
-					<div className='flex flex-1 flex-col gap-4 p-4'>
-						<div className='grid auto-rows-min gap-4 md:grid-cols-1'>
-							<div className='rounded-xl bg-muted/50 p-4 flex flex-row gap-4 justify-between'>
-								<p className={'text-xl text-primary font-semibold'}>
+
+					<div className='flex flex-1 flex-col gap-6 p-6 bg-gray-50'>
+						{/* Заголовок вопроса с действиями */}
+						<div className='sticky top-16 z-20'>
+							<div className='rounded-lg bg-white shadow-md p-4 flex flex-row items-center justify-between'>
+								<h2 className='text-2xl font-bold text-primary'>
 									{askData?.title}
-								</p>
+								</h2>
 								<AlertDialog>
 									<AlertDialogTrigger asChild>
-										<Trash2
-											className={
-												'text-primary transition ease-in-out duration-300 hover:text-red-500 cursor-pointer'
-											}
-										/>
+										<Button
+											variant='outline'
+											size='icon'
+											className='text-red-500 border-red-200 hover:bg-red-50 mr-1'
+										>
+											<div className='flex-shrink-0 flex items-center justify-center w-8 h-8'>
+												<Trash2 className='h-4 w-4' />
+											</div>
+										</Button>
 									</AlertDialogTrigger>
 									<AlertDialogContent>
 										<AlertDialogHeader>
@@ -301,42 +316,62 @@ const Ask = observer(({ ask }) => {
 							</div>
 						</div>
 
-						<div className={'grid grid-cols-2 gap-4'}>
-							<div className='col-span-2 lg:col-span-1 rounded-xl bg-muted/50 md:min-h-min p-4 flex flex-col gap-4'>
-								<div className={'w-full flex flex-col gap-4'}>
-									<Form {...methods}>
-										<form
-											onSubmit={methods.handleSubmit(onSubmit)}
-											className='grid gap-4'
-										>
-											<FormField
-												control={methods.control}
-												name='title'
-												render={({ field }) => (
-													<FormItem className='grid gap-2'>
-														<FormLabel>Название вопроса</FormLabel>
+						{/* Содержимое вопроса */}
+						<div className='grid grid-cols-1 gap-6'>
+							{/* Форма редактирования названия */}
+							<div className='rounded-lg bg-white shadow-md p-5'>
+								<h3 className='text-lg font-medium mb-4 flex items-center gap-2'>
+									<Edit className='h-4 w-4 text-blue-500' />
+									Редактирование вопроса
+								</h3>
+								<Form {...methods}>
+									<form
+										onSubmit={methods.handleSubmit(onSubmit)}
+										className='flex items-end gap-4'
+									>
+										<FormField
+											control={methods.control}
+											name='title'
+											render={({ field }) => (
+												<FormItem className='flex-1'>
+													<FormLabel>Название вопроса</FormLabel>
+													<div className='flex items-center gap-2'>
 														<FormControl>
 															<Input
 																{...field}
 																onChange={e => field.onChange(e.target.value)}
 																type={'text'}
-																placeholder={'Название вопроса'}
+																placeholder={'Введите новое название вопроса'}
 																required
+																className='border-primary/20 focus:border-primary'
 															/>
 														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
+														<Button
+															type='submit'
+															size='sm'
+															className='flex-shrink-0'
+														>
+															<Edit className='h-4 w-4 mr-1' />
+															Обновить
+														</Button>
+													</div>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</form>
+								</Form>
+							</div>
 
-											<Button type='submit' className='w-full'>
-												Сменить название
-											</Button>
-										</form>
-									</Form>
-
-									<Separator />
-
+							{/* Ответы на вопрос */}
+							<div className='rounded-lg bg-white shadow-md overflow-hidden'>
+								<div className='p-5 border-b'>
+									<h3 className='text-lg font-medium flex items-center gap-2'>
+										<MessageCircle className='h-4 w-4 text-amber-500' />
+										Ответы на вопрос
+									</h3>
+								</div>
+								<div className='p-5'>
 									<AddAskAnswer
 										title={askData?.title}
 										module_id={askData?.module_id}

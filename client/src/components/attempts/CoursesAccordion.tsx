@@ -7,12 +7,14 @@ interface CoursesAccordionProps {
 	courses: Course[]
 	checkedAttempts: Set<string>
 	onToggle: (id: string) => void
+	isLoading?: boolean
 }
 
 export const CoursesAccordion: React.FC<CoursesAccordionProps> = ({
 	courses,
 	checkedAttempts,
 	onToggle,
+	isLoading = false,
 }) => {
 	const [openCourses, setOpenCourses] = useState<Set<string>>(new Set())
 
@@ -53,6 +55,17 @@ export const CoursesAccordion: React.FC<CoursesAccordionProps> = ({
 			checkedAttempts.has(attempt.id)
 		).length
 		return checkedCount > 0 && checkedCount < course.attempts.length
+	}
+
+	if (isLoading) {
+		return (
+			<div className='text-center py-8'>
+				<div className='flex justify-center mb-2'>
+					<div className='h-12 w-12 rounded-full border-4 border-green-600 border-t-transparent animate-spin'></div>
+				</div>
+				<p className='text-gray-500'>Загрузка данных...</p>
+			</div>
+		)
 	}
 
 	if (!courses.length) {

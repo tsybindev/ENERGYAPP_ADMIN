@@ -2,6 +2,7 @@
 //@ts-ignore
 
 import * as React from 'react'
+import { useState } from 'react'
 import {
 	BookCheck,
 	ChevronRight,
@@ -11,6 +12,8 @@ import {
 	Package,
 	StickyNote,
 	Camera,
+	Search,
+	X,
 } from 'lucide-react'
 import Image from 'next/image'
 import {
@@ -35,6 +38,7 @@ import {
 } from '@/components/ui/sidebar'
 import AddCourse from '@/components/elements/AddCourse'
 import { Separator } from '@/components/ui/separator'
+import { Input } from '@/components/ui/input'
 import {
 	Catalog,
 	CatalogModule,
@@ -51,6 +55,22 @@ import Profile from '@/components/elements/Profile'
 export const AppSidebar = observer(
 	({ ...props }: React.ComponentProps<typeof Sidebar>) => {
 		const data = StoreCatalog.catalog
+		const isLoading = StoreCatalog.isLoad
+		const [searchQuery, setSearchQuery] = useState('')
+
+		React.useEffect(() => {
+			if (!data && !isLoading) {
+				StoreCatalog.loading()
+			}
+		}, [data, isLoading])
+
+		const filteredCourses = React.useMemo(() => {
+			if (!data || !searchQuery.trim()) return data
+
+			return data.filter(catalog =>
+				catalog.title.toLowerCase().includes(searchQuery.toLowerCase())
+			)
+		}, [data, searchQuery])
 
 		return (
 			<Sidebar {...props}>
@@ -81,22 +101,55 @@ export const AppSidebar = observer(
 						<AddCourse />
 					</SidebarGroup>
 
-					<SidebarGroupLabel className={'mt-2'}>
-						Список курсов
-					</SidebarGroupLabel>
+					<SidebarGroup className={'mt-1'}>
+						<div className='flex items-center w-full relative'>
+							<Input
+								placeholder='Поиск по курсам...'
+								value={searchQuery}
+								onChange={e => setSearchQuery(e.target.value)}
+								className={searchQuery ? 'pr-16' : 'pr-8'}
+							/>
+							<div className='absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center'>
+								{searchQuery && (
+									<button
+										onClick={() => setSearchQuery('')}
+										className='mr-2 p-1 rounded-full hover:bg-gray-200 focus:outline-none'
+										aria-label='Очистить поиск'
+									>
+										<X className='h-3 w-3 text-muted-foreground' />
+									</button>
+								)}
+								<Search className='h-4 w-4 text-muted-foreground' />
+							</div>
+						</div>
+					</SidebarGroup>
 				</SidebarHeader>
 
 				<SidebarContent>
 					<SidebarGroup>
 						<SidebarGroupContent>
 							<SidebarMenu>
-								{data?.map(catalog => (
-									<CatalogElement
-										key={catalog.item_id}
-										title={catalog.title}
-										item_id={catalog.item_id}
-									/>
-								))}
+								{isLoading ? (
+									<div className='p-2 text-center text-muted-foreground'>
+										Загрузка курсов...
+									</div>
+								) : filteredCourses && filteredCourses.length > 0 ? (
+									filteredCourses.map(catalog => (
+										<CatalogElement
+											key={catalog.item_id}
+											title={catalog.title}
+											item_id={catalog.item_id}
+										/>
+									))
+								) : searchQuery.trim() ? (
+									<div className='p-2 text-center text-muted-foreground'>
+										Курсы не найдены
+									</div>
+								) : (
+									<div className='p-2 text-center text-muted-foreground'>
+										Список курсов пуст
+									</div>
+								)}
 							</SidebarMenu>
 						</SidebarGroupContent>
 					</SidebarGroup>

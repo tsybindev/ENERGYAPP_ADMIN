@@ -8,7 +8,16 @@ import { toast } from 'sonner'
 import Cookies from 'js-cookie'
 import { observer } from 'mobx-react'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { ArrowLeft, Download, PanelLeft, Trash2, X } from 'lucide-react'
+import {
+	ArrowLeft,
+	Download,
+	PanelLeft,
+	Trash2,
+	X,
+	Edit,
+	BookOpen,
+	Info,
+} from 'lucide-react'
 
 import Head from 'next/head'
 import Link from 'next/link'
@@ -26,6 +35,14 @@ import StoreCatalog from '@/lib/store/storeCatalog'
 import StoreLessons from '@/lib/store/storeLessons'
 import { AppSidebar } from '@/components/app-sidebar'
 import { Separator } from '@/components/ui/separator'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '@/components/ui/card'
 import { zodResolver } from '@hookform/resolvers/zod'
 import AddLesson from '@/components/elements/AddLesson'
 import { httpErrorsSplit } from '@/utils/httpErrorsSplit'
@@ -110,7 +127,17 @@ const Lesson = observer(({ lesson }) => {
 		const toastId = toast.loading('Изменение названия лекции...')
 
 		try {
-			await editTitleLesson(token, lessonData?.item_id, title)
+			const updatedLesson = await editTitleLesson(
+				token,
+				lessonData?.item_id,
+				title
+			)
+
+			// Обновляем данные лекции в store напрямую
+			StoreLessons.setLesson({
+				...lessonData,
+				title: title,
+			})
 
 			toast.success('Название лекции изменено!', {
 				id: toastId,
@@ -129,6 +156,7 @@ const Lesson = observer(({ lesson }) => {
 
 			reset()
 
+			// Обновляем каталог и лекцию в фоне
 			StoreCatalog.loading().then()
 			if (lessonId) {
 				StoreLessons.getLesson(lessonId).then()
@@ -219,36 +247,23 @@ const Lesson = observer(({ lesson }) => {
 				<AppSidebar />
 
 				<SidebarInset>
-					<header className='flex h-16 shrink-0 items-center gap-2 border-b px-4'>
+					<header className='sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-white shadow-sm'>
 						<Button
 							variant='ghost'
 							size='icon'
-							className={cn('h-7 w-7 flex items-center justify-center')}
+							className='h-8 w-8 flex items-center justify-center'
 							onClick={router.back}
 						>
-							<ArrowLeft
-								className={cn(
-									'z-20 hidden w-4 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex',
-									'[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize',
-									'[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize',
-									'group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full group-data-[collapsible=offcanvas]:hover:bg-sidebar',
-									'[[data-side=left][data-collapsible=offcanvas]_&]:-right-2',
-									'[[data-side=right][data-collapsible=offcanvas]_&]:-left-2'
-								)}
-							/>
+							<ArrowLeft className='h-4 w-4' />
 						</Button>
 
 						<Separator orientation='vertical' className='mr-2 h-4' />
 
-						<SidebarTrigger className='-ml-1' />
+						<SidebarTrigger className='-ml-1 text-green-600 hover:text-green-700 hover:bg-green-50' />
 
 						<Separator orientation='vertical' className='mr-2 h-4' />
 
-						<div
-							className={
-								'w-full flex flex-row justify-between items-center gap-4'
-							}
-						>
+						<div className='w-full flex flex-row justify-between items-center gap-4'>
 							<Breadcrumb>
 								<BreadcrumbList>
 									<BreadcrumbItem className='hidden md:block'>
@@ -276,85 +291,117 @@ const Lesson = observer(({ lesson }) => {
 							</Breadcrumb>
 						</div>
 					</header>
-					<div className='flex flex-1 flex-col gap-4 p-4'>
-						<div className='grid auto-rows-min gap-4 md:grid-cols-1'>
-							<div className='rounded-xl bg-muted/50 p-4 flex flex-row gap-4 justify-between'>
-								<p className={'text-xl text-primary font-semibold'}>
-									{lessonData?.title}
-								</p>
-								<AlertDialog>
-									<AlertDialogTrigger asChild>
-										<Trash2
-											className={
-												'text-primary transition ease-in-out duration-300 hover:text-red-500 cursor-pointer'
-											}
-										/>
-									</AlertDialogTrigger>
-									<AlertDialogContent>
-										<AlertDialogHeader>
-											<AlertDialogTitle>Подтвердите удаление</AlertDialogTitle>
-											<AlertDialogDescription>
-												Данное действие нельзя будет отменить
-											</AlertDialogDescription>
-										</AlertDialogHeader>
-										<AlertDialogFooter>
-											<AlertDialogCancel>Отмена</AlertDialogCancel>
-											<AlertDialogAction
-												onClick={() => handleDeleteLesson()}
-												className={'bg-red-500 hover:bg-red-400'}
+					<div className='flex flex-1 flex-col gap-6 p-6 bg-gray-50'>
+						{/* Заголовок лекции с действиями */}
+						<Card className='border-none shadow-md'>
+							<CardHeader className='flex flex-row items-center justify-between pb-2'>
+								<div>
+									<CardTitle className='text-2xl font-bold text-primary'>
+										{lessonData?.title}
+									</CardTitle>
+								</div>
+								<div className='flex items-center gap-2'>
+									<AlertDialog>
+										<AlertDialogTrigger asChild>
+											<Button
+												variant='outline'
+												size='icon'
+												className='text-red-500 border-red-200 hover:bg-red-50'
 											>
-												Удалить
-											</AlertDialogAction>
-										</AlertDialogFooter>
-									</AlertDialogContent>
-								</AlertDialog>
-							</div>
-						</div>
-
-						<div className='grid auto-rows-min gap-4 md:grid-cols-1'>
-							<div className='col-span-2 lg:col-span-1 rounded-xl bg-muted/50 md:min-h-min p-4 flex flex-col gap-4'>
-								<div className={'w-full flex flex-col gap-4'}>
-									<Form {...methods}>
-										<form
-											onSubmit={methods.handleSubmit(onSubmit)}
-											className='grid gap-4'
-										>
-											<FormField
-												control={methods.control}
-												name='title'
-												render={({ field }) => (
-													<FormItem className='grid gap-2'>
-														<FormLabel>Название лекции</FormLabel>
+												<div className='flex-shrink-0 flex items-center justify-center w-8 h-8'>
+													<Trash2 className='h-4 w-4' />
+												</div>
+											</Button>
+										</AlertDialogTrigger>
+										<AlertDialogContent>
+											<AlertDialogHeader>
+												<AlertDialogTitle>
+													Подтвердите удаление
+												</AlertDialogTitle>
+												<AlertDialogDescription>
+													Данное действие нельзя будет отменить
+												</AlertDialogDescription>
+											</AlertDialogHeader>
+											<AlertDialogFooter>
+												<AlertDialogCancel>Отмена</AlertDialogCancel>
+												<AlertDialogAction
+													onClick={() => handleDeleteLesson()}
+													className={'bg-red-500 hover:bg-red-400'}
+												>
+													Удалить
+												</AlertDialogAction>
+											</AlertDialogFooter>
+										</AlertDialogContent>
+									</AlertDialog>
+								</div>
+							</CardHeader>
+							<CardContent>
+								<Form {...methods}>
+									<form
+										onSubmit={methods.handleSubmit(onSubmit)}
+										className='flex items-end gap-4'
+									>
+										<FormField
+											control={methods.control}
+											name='title'
+											render={({ field }) => (
+												<FormItem className='flex-1'>
+													<FormLabel>Название лекции</FormLabel>
+													<div className='flex items-center gap-2'>
 														<FormControl>
 															<Input
 																{...field}
 																onChange={e => field.onChange(e.target.value)}
 																type={'text'}
-																placeholder={'Название лекции'}
+																placeholder={'Введите новое название лекции'}
 																required
+																className='border-primary/20 focus:border-primary'
 															/>
 														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
+														<Button
+															type='submit'
+															size='sm'
+															className='flex-shrink-0'
+														>
+															<Edit className='h-4 w-4 mr-1' />
+															Обновить
+														</Button>
+													</div>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</form>
+								</Form>
+							</CardContent>
+						</Card>
 
-											<Button type='submit' className='w-full'>
-												Сменить название
-											</Button>
-										</form>
-									</Form>
+						{/* Контент лекции */}
+						<div className='pt-4 pb-0 bg-gray-50'>
+							<Card className='border-none shadow-md'>
+								<div className='sticky top-16 z-10 bg-white rounded-t-lg'>
+									<CardHeader className='flex flex-row items-center justify-between pb-2'>
+										<div>
+											<CardTitle className='text-xl flex items-center gap-2'>
+												<BookOpen className='h-5 w-5 text-blue-500' />
+												Содержание лекции
+											</CardTitle>
+											<CardDescription>
+												Редактор контента лекции
+											</CardDescription>
+										</div>
+									</CardHeader>
+								</div>
 
-									<Separator />
-
+								<CardContent className='p-4'>
 									<Editor
 										token={token}
 										title={lessonData?.title}
 										lesson_id={lessonData?.item_id}
 										initialContent={lessonData?.content.text}
 									/>
-								</div>
-							</div>
+								</CardContent>
+							</Card>
 						</div>
 					</div>
 				</SidebarInset>

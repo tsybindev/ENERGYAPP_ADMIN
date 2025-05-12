@@ -190,14 +190,14 @@ const Home = observer(() => {
 							</Button>
 						</div>
 						<div className='mt-6'>
-							{selectedUser && storeAttempts.userCourses && (
+							{selectedUser ? (
 								<CoursesAccordion
 									courses={storeAttempts.userCourses}
 									checkedAttempts={checkedAttempts}
 									onToggle={handleToggleAttempt}
+									isLoading={storeAttempts.loading}
 								/>
-							)}
-							{!selectedUser && (
+							) : (
 								<div className='text-center text-gray-500 py-8'>
 									Введите ФИО или email пользователя, затем выберите
 									курсы/попытки для скачивания результатов

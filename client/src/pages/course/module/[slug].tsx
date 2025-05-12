@@ -8,7 +8,17 @@ import { toast } from 'sonner'
 import Cookies from 'js-cookie'
 import { observer } from 'mobx-react'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { ArrowLeft, Download, PanelLeft, Trash2, X } from 'lucide-react'
+import {
+	ArrowLeft,
+	Download,
+	PanelLeft,
+	Trash2,
+	X,
+	Edit,
+	BookOpen,
+	HelpCircle,
+	Info,
+} from 'lucide-react'
 
 import Head from 'next/head'
 import Link from 'next/link'
@@ -86,6 +96,16 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '@/components/ui/card'
+import LessonCard from '@/components/elements/LessonCard'
+import AskCard from '@/components/elements/AskCard'
 
 const Module = observer(({ module }) => {
 	const token = Cookies.get('users_access_token')
@@ -129,7 +149,13 @@ const Module = observer(({ module }) => {
 		const toastId = toast.loading('Изменение названия модуля...')
 
 		try {
-			await editTitleModule(token, moduleId, title)
+			const updatedModule = await editTitleModule(token, moduleId, title)
+
+			// Обновляем данные модуля в store напрямую
+			StoreModule.setModule({
+				...moduleData,
+				title: title,
+			})
 
 			toast.success('Название модуля изменено!', {
 				id: toastId,
@@ -148,6 +174,7 @@ const Module = observer(({ module }) => {
 
 			reset()
 
+			// Обновляем каталог и модуль в фоне
 			StoreCatalog.loading().then()
 			if (moduleId) {
 				StoreModule.getModule(moduleId).then()
@@ -213,14 +240,18 @@ const Module = observer(({ module }) => {
 	}
 
 	const [lessons, setLessons] = useState<Lessons[]>([])
+	const [isLessonsLoading, setIsLessonsLoading] = useState<boolean>(true)
 
 	useEffect(() => {
 		const fetchLessons = async () => {
+			setIsLessonsLoading(true)
 			try {
 				const response = await getModuleLessons(token, moduleId) // Ожидаем завершения запроса
 				setLessons(response) // Устанавливаем данные
 			} catch (e) {
-				console.error('Ошибка при загрузке модулей:', e) // Логируем ошибку
+				console.error('Ошибка при загрузке лекций:', e) // Логируем ошибку
+			} finally {
+				setIsLessonsLoading(false)
 			}
 		}
 
@@ -228,19 +259,23 @@ const Module = observer(({ module }) => {
 	}, [token, moduleId]) // Данные изменятся только при изменении token или moduleId
 
 	const [asks, setAsks] = useState<Asks[]>([])
+	const [isAsksLoading, setIsAsksLoading] = useState<boolean>(true)
 
 	useEffect(() => {
 		const fetchAsks = async () => {
+			setIsAsksLoading(true)
 			try {
 				const response = await getAsks(token, moduleId) // Ожидаем завершения запроса
 				setAsks(response) // Устанавливаем данные
 			} catch (e) {
-				console.error('Ошибка при загрузке модулей:', e) // Логируем ошибку
+				console.error('Ошибка при загрузке вопросов:', e) // Логируем ошибку
+			} finally {
+				setIsAsksLoading(false)
 			}
 		}
 
 		fetchAsks() // Вызываем асинхронную функцию
-	}, [token, moduleId]) // Данные изменятся только при изменении token или courseId
+	}, [token, moduleId]) // Данные изменятся только при изменении token или moduleId
 
 	return (
 		<>
@@ -252,36 +287,23 @@ const Module = observer(({ module }) => {
 				<AppSidebar />
 
 				<SidebarInset>
-					<header className='flex h-16 shrink-0 items-center gap-2 border-b px-4'>
+					<header className='sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-white shadow-sm'>
 						<Button
 							variant='ghost'
 							size='icon'
-							className={cn('h-7 w-7 flex items-center justify-center')}
+							className='h-8 w-8 flex items-center justify-center'
 							onClick={router.back}
 						>
-							<ArrowLeft
-								className={cn(
-									'z-20 hidden w-4 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex',
-									'[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize',
-									'[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize',
-									'group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full group-data-[collapsible=offcanvas]:hover:bg-sidebar',
-									'[[data-side=left][data-collapsible=offcanvas]_&]:-right-2',
-									'[[data-side=right][data-collapsible=offcanvas]_&]:-left-2'
-								)}
-							/>
+							<ArrowLeft className='h-4 w-4' />
 						</Button>
 
 						<Separator orientation='vertical' className='mr-2 h-4' />
 
-						<SidebarTrigger className='-ml-1' />
+						<SidebarTrigger className='-ml-1 text-green-600 hover:text-green-700 hover:bg-green-50' />
 
 						<Separator orientation='vertical' className='mr-2 h-4' />
 
-						<div
-							className={
-								'w-full flex flex-row justify-between items-center gap-4'
-							}
-						>
+						<div className='w-full flex flex-row justify-between items-center gap-4'>
 							<Breadcrumb>
 								<BreadcrumbList>
 									<BreadcrumbItem className='hidden md:block'>
@@ -301,178 +323,188 @@ const Module = observer(({ module }) => {
 							</Breadcrumb>
 						</div>
 					</header>
-					<div className='flex flex-1 flex-col gap-4 p-4'>
-						<div className='grid auto-rows-min gap-4 md:grid-cols-1'>
-							<div className='rounded-xl bg-muted/50 p-4 flex flex-row gap-4 justify-between'>
-								<p className={'text-xl text-primary font-semibold'}>
-									{moduleData?.title}
-								</p>
-								<AlertDialog>
-									<AlertDialogTrigger asChild>
-										<Trash2
-											className={
-												'text-primary transition ease-in-out duration-300 hover:text-red-500 cursor-pointer'
-											}
-										/>
-									</AlertDialogTrigger>
-									<AlertDialogContent>
-										<AlertDialogHeader>
-											<AlertDialogTitle>Подтвердите удаление</AlertDialogTitle>
-											<AlertDialogDescription>
-												Данное действие нельзя будет отменить
-											</AlertDialogDescription>
-										</AlertDialogHeader>
-										<AlertDialogFooter>
-											<AlertDialogCancel>Отмена</AlertDialogCancel>
-											<AlertDialogAction
-												onClick={() => handleDeleteModule()}
-												className={'bg-red-500 hover:bg-red-400'}
-											>
-												Удалить
-											</AlertDialogAction>
-										</AlertDialogFooter>
-									</AlertDialogContent>
-								</AlertDialog>
-							</div>
-						</div>
 
-						<div className={'grid grid-cols-2 gap-4'}>
-							<div className='col-span-2 lg:col-span-1 rounded-xl bg-muted/50 md:min-h-min p-4 flex flex-col gap-4'>
-								<div className={'w-full flex flex-col gap-4'}>
-									<Form {...methods}>
-										<form
-											onSubmit={methods.handleSubmit(onSubmit)}
-											className='grid gap-4'
-										>
-											<FormField
-												control={methods.control}
-												name='title'
-												render={({ field }) => (
-													<FormItem className='grid gap-2'>
-														<FormLabel>Название модуля</FormLabel>
+					<div className='flex flex-1 flex-col gap-6 p-6 bg-gray-50'>
+						{/* Заголовок модуля с действиями */}
+						<Card className='border-none shadow-md'>
+							<CardHeader className='flex flex-row items-center justify-between pb-2'>
+								<div>
+									<CardTitle className='text-2xl font-bold text-primary'>
+										{moduleData?.title}
+									</CardTitle>
+								</div>
+								<div className='flex items-center gap-2'>
+									<AlertDialog>
+										<AlertDialogTrigger asChild>
+											<Button
+												variant='outline'
+												size='icon'
+												className='text-red-500 border-red-200 hover:bg-red-50'
+											>
+												<div className='flex-shrink-0 flex items-center justify-center w-8 h-8'>
+													<Trash2 className='h-4 w-4' />
+												</div>
+											</Button>
+										</AlertDialogTrigger>
+										<AlertDialogContent>
+											<AlertDialogHeader>
+												<AlertDialogTitle>
+													Подтвердите удаление
+												</AlertDialogTitle>
+												<AlertDialogDescription>
+													Данное действие нельзя будет отменить
+												</AlertDialogDescription>
+											</AlertDialogHeader>
+											<AlertDialogFooter>
+												<AlertDialogCancel>Отмена</AlertDialogCancel>
+												<AlertDialogAction
+													onClick={() => handleDeleteModule()}
+													className={'bg-red-500 hover:bg-red-400'}
+												>
+													Удалить
+												</AlertDialogAction>
+											</AlertDialogFooter>
+										</AlertDialogContent>
+									</AlertDialog>
+								</div>
+							</CardHeader>
+							<CardContent>
+								<Form {...methods}>
+									<form
+										onSubmit={methods.handleSubmit(onSubmit)}
+										className='flex items-end gap-4'
+									>
+										<FormField
+											control={methods.control}
+											name='title'
+											render={({ field }) => (
+												<FormItem className='flex-1'>
+													<FormLabel>Название модуля</FormLabel>
+													<div className='flex items-center gap-2'>
 														<FormControl>
 															<Input
 																{...field}
 																onChange={e => field.onChange(e.target.value)}
 																type={'text'}
-																placeholder={'Название модуля'}
+																placeholder={'Введите новое название модуля'}
 																required
+																className='border-primary/20 focus:border-primary'
 															/>
 														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
+														<Button
+															type='submit'
+															size='sm'
+															className='flex-shrink-0'
+														>
+															<Edit className='h-4 w-4 mr-1' />
+															Обновить
+														</Button>
+													</div>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</form>
+								</Form>
+							</CardContent>
+						</Card>
 
-											<Button type='submit' className='w-full'>
-												Сменить название
-											</Button>
-										</form>
-									</Form>
-								</div>
-							</div>
-
-							<div className={'flex flex-col gap-4'}>
-								<div
-									className={
-										'col-span-2 lg:col-span-1 rounded-xl bg-muted/50 md:min-h-min p-4 flex flex-col gap-4'
-									}
-								>
-									<Accordion type='single' collapsible>
-										<AccordionItem value='item-1'>
-											<AccordionTrigger
-												className={'text-lg font-semibold text-primary'}
-											>
-												Список лекций
-											</AccordionTrigger>
-											<AccordionContent>
-												<div className={'w-full flex flex-col gap-2'}>
-													{lessons.length ? (
-														lessons.map(lesson => (
-															<Link
-																href={
-																	loadingLessons || loadingAsks
-																		? '#'
-																		: `/course/module/lesson/${lesson.item_id}`
-																}
-																key={lesson.item_id}
-																onClick={e => {
-																	if (loadingLessons) {
-																		e.preventDefault()
-																		return
-																	}
-																	setLoadingLessons(true)
-																}}
-																className={cn(
-																	'p-2 rounded-sm transition ease-in-out duration-300 hover:bg-gray-200',
-																	(loadingLessons || loadingAsks) &&
-																		'opacity-50 cursor-not-allowed'
-																)}
-															>
-																<p>{lesson.title}</p>
-															</Link>
-														))
-													) : (
-														<p>Лекции не найдены</p>
-													)}
-												</div>
-											</AccordionContent>
-										</AccordionItem>
-									</Accordion>
-
-									<AddLesson module_id={moduleId} />
+						{/* Лекции */}
+						<div className='pt-4 pb-0 bg-gray-50'>
+							<Card className='border-none shadow-md'>
+								<div className='sticky top-16 z-10 bg-white rounded-t-lg'>
+									<CardHeader className='flex flex-row items-center justify-between pb-2'>
+										<div>
+											<CardTitle className='text-xl flex items-center gap-2'>
+												<BookOpen className='h-5 w-5 text-blue-500' />
+												Лекции
+											</CardTitle>
+											<CardDescription>
+												Учебные материалы модуля
+											</CardDescription>
+										</div>
+										<div>
+											<AddLesson module_id={moduleId} />
+										</div>
+									</CardHeader>
 								</div>
 
-								<div
-									className={
-										'col-span-2 lg:col-span-1 rounded-xl bg-muted/50 md:min-h-min p-4 flex flex-col gap-4'
-									}
-								>
-									<Accordion type='single' collapsible>
-										<AccordionItem value='item-1'>
-											<AccordionTrigger
-												className={'text-lg font-semibold text-primary'}
-											>
-												Список вопросов
-											</AccordionTrigger>
-											<AccordionContent>
-												<div className={'w-full flex flex-col gap-2'}>
-													{asks.length ? (
-														asks.map(ask => (
-															<Link
-																href={
-																	loadingAsks || loadingLessons
-																		? '#'
-																		: `/course/module/ask/${ask.item_id}`
-																}
-																key={ask.item_id}
-																onClick={e => {
-																	if (loadingAsks) {
-																		e.preventDefault()
-																		return
-																	}
-																	setLoadingAsks(true)
-																}}
-																className={cn(
-																	'p-2 rounded-sm transition ease-in-out duration-300 hover:bg-gray-200',
-																	(loadingLessons || loadingAsks) &&
-																		'opacity-50 cursor-not-allowed'
-																)}
-															>
-																<p>{ask.title}</p>
-															</Link>
-														))
-													) : (
-														<p>Вопросы не найдены</p>
-													)}
-												</div>
-											</AccordionContent>
-										</AccordionItem>
-									</Accordion>
+								<CardContent className='p-0'>
+									{isLessonsLoading ? (
+										<div className='flex flex-col items-center justify-center py-8 text-center'>
+											<div className='h-12 w-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin mb-2'></div>
+											<p className='text-gray-500 mb-4'>Загрузка лекций...</p>
+										</div>
+									) : lessons.length > 0 ? (
+										<div className='grid gap-3 p-4 pt-2'>
+											{lessons.map(lesson => (
+												<LessonCard
+													key={lesson.item_id}
+													lesson={lesson}
+													isLoading={loadingLessons}
+													onNavigate={() => setLoadingLessons(true)}
+												/>
+											))}
+										</div>
+									) : (
+										<div className='flex flex-col items-center justify-center py-8 text-center'>
+											<Info className='h-12 w-12 text-gray-300 mb-2' />
+											<p className='text-gray-500 mb-4'>
+												Лекции пока не добавлены
+											</p>
+										</div>
+									)}
+								</CardContent>
+							</Card>
+						</div>
 
-									<AddAsk module_id={moduleId} />
+						{/* Вопросы */}
+						<div className='pt-4 pb-0 bg-gray-50'>
+							<Card className='border-none shadow-md'>
+								<div className='sticky top-16 z-10 bg-white rounded-t-lg'>
+									<CardHeader className='flex flex-row items-center justify-between pb-2'>
+										<div>
+											<CardTitle className='text-xl flex items-center gap-2'>
+												<HelpCircle className='h-5 w-5 text-amber-500' />
+												Вопросы
+											</CardTitle>
+											<CardDescription>
+												Контрольные вопросы для проверки знаний
+											</CardDescription>
+										</div>
+										<div>
+											<AddAsk module_id={moduleId} />
+										</div>
+									</CardHeader>
 								</div>
-							</div>
+
+								<CardContent className='p-0'>
+									{isAsksLoading ? (
+										<div className='flex flex-col items-center justify-center py-8 text-center'>
+											<div className='h-12 w-12 rounded-full border-4 border-amber-500 border-t-transparent animate-spin mb-2'></div>
+											<p className='text-gray-500 mb-4'>Загрузка вопросов...</p>
+										</div>
+									) : asks.length > 0 ? (
+										<div className='grid gap-3 p-4 pt-2'>
+											{asks.map(ask => (
+												<AskCard
+													key={ask.item_id}
+													ask={ask}
+													isLoading={loadingAsks}
+													onNavigate={() => setLoadingAsks(true)}
+												/>
+											))}
+										</div>
+									) : (
+										<div className='flex flex-col items-center justify-center py-8 text-center'>
+											<Info className='h-12 w-12 text-gray-300 mb-2' />
+											<p className='text-gray-500 mb-4'>
+												Вопросы пока не добавлены
+											</p>
+										</div>
+									)}
+								</CardContent>
+							</Card>
 						</div>
 					</div>
 				</SidebarInset>

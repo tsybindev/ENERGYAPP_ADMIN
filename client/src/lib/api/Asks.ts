@@ -78,13 +78,30 @@ export async function editTitleAsk(
 	token: string,
 	module_id: string,
 	ask_id: string,
-	title: string
+	title: string,
+	currentAsk?: any // Добавляем параметр для текущего состояния вопроса
 ) {
+	// Подготавливаем данные для отправки
+	const requestData: any = {
+		title: title,
+	}
+
+	// Если есть текущие данные вопроса, добавляем ответы и is_input
+	if (currentAsk) {
+		// Добавляем ответы только если они существуют
+		if (currentAsk.answers && currentAsk.answers.length > 0) {
+			requestData.answers = currentAsk.answers
+		}
+
+		// Добавляем is_input только если оно определено
+		if (typeof currentAsk.is_input !== 'undefined') {
+			requestData.is_input = currentAsk.is_input
+		}
+	}
+
 	const response = await API.patch(
 		`/modules/${module_id}/test/asks/${ask_id}/`,
-		{
-			title: title,
-		},
+		requestData,
 		{
 			headers: {
 				'Content-Type': 'application/json',
