@@ -1,0 +1,1 @@
+export { CoursesAccordion } from './CoursesAccordion'
