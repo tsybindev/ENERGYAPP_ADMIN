@@ -46,6 +46,7 @@ import {
 	CheckCircle,
 	Clock,
 	Info,
+	ArrowLeft,
 } from 'lucide-react'
 import StoreCatalog from '@/lib/store/storeCatalog'
 import { httpErrorsSplit } from '@/utils/httpErrorsSplit'
@@ -315,6 +316,16 @@ const Course = observer(({ course }) => {
 
 				<SidebarInset>
 					<header className='sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-white shadow-sm'>
+						<Button
+							variant='ghost'
+							size='icon'
+							className='h-8 w-8 flex items-center justify-center'
+							onClick={router.back}
+						>
+							<ArrowLeft className='h-4 w-4 text-green-600 hover:text-green-700 hover:bg-green-50' />
+						</Button>
+
+						<Separator orientation='vertical' className='mr-2 h-4' />
 						<SidebarTrigger className='-ml-1 text-green-600 hover:text-green-700 hover:bg-green-50' />
 
 						<Separator orientation='vertical' className='mr-2 h-4' />
@@ -327,7 +338,7 @@ const Course = observer(({ course }) => {
 									</BreadcrumbItem>
 									<BreadcrumbSeparator className='hidden md:block' />
 									<BreadcrumbItem>
-										<BreadcrumbPage>{courseData?.title}</BreadcrumbPage>
+										<BreadcrumbPage>Просмотр курса</BreadcrumbPage>
 									</BreadcrumbItem>
 								</BreadcrumbList>
 							</Breadcrumb>
@@ -469,7 +480,7 @@ const Course = observer(({ course }) => {
 						</div>
 
 						{/* Изображения и шаблон */}
-						<div className='sticky top-16 z-20 bg-gray-50'>
+						<div className='sticky top-16 z-20 bg-gray-50 pt-4'>
 							<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
 								{/* Главное изображение */}
 								<Card className='h-full relative bg-white'>

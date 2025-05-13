@@ -70,21 +70,26 @@ export async function deleteLesson(token: string, item_id: string) {
 export async function editTitleLesson(
 	token: string,
 	lesson_id: string,
-	title: string
+	title: string,
+	content: any = null
 ) {
-	const response = await API.patch(
-		`/lessons/${lesson_id}/`,
-		{
-			title: title,
-			lesson_id: lesson_id,
+	// Подготавливаем данные для отправки
+	const requestData: any = {
+		title: title,
+		lesson_id: lesson_id,
+	}
+
+	// Если передан контент, добавляем его в запрос
+	if (content) {
+		requestData.content = content
+	}
+
+	const response = await API.patch(`/lessons/${lesson_id}/`, requestData, {
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${token}`,
 		},
-		{
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${token}`,
-			},
-		}
-	)
+	})
 
 	return response.data
 }

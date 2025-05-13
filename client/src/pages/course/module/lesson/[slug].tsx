@@ -127,10 +127,12 @@ const Lesson = observer(({ lesson }) => {
 		const toastId = toast.loading('Изменение названия лекции...')
 
 		try {
+			// Передаем текущий контент лекции вместе с заголовком
 			const updatedLesson = await editTitleLesson(
 				token,
 				lessonData?.item_id,
-				title
+				title,
+				lessonData?.content // Передаем текущий контент лекции
 			)
 
 			// Обновляем данные лекции в store напрямую
@@ -254,7 +256,7 @@ const Lesson = observer(({ lesson }) => {
 							className='h-8 w-8 flex items-center justify-center'
 							onClick={router.back}
 						>
-							<ArrowLeft className='h-4 w-4' />
+							<ArrowLeft className='h-4 w-4 text-green-600 hover:text-green-700 hover:bg-green-50' />
 						</Button>
 
 						<Separator orientation='vertical' className='mr-2 h-4' />
@@ -285,7 +287,7 @@ const Lesson = observer(({ lesson }) => {
 									</BreadcrumbItem>
 									<BreadcrumbSeparator className='hidden md:block' />
 									<BreadcrumbItem>
-										<BreadcrumbPage>{lessonData?.title}</BreadcrumbPage>
+										<BreadcrumbPage>Просмотр лекции</BreadcrumbPage>
 									</BreadcrumbItem>
 								</BreadcrumbList>
 							</Breadcrumb>

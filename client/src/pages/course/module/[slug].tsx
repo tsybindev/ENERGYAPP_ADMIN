@@ -294,7 +294,7 @@ const Module = observer(({ module }) => {
 							className='h-8 w-8 flex items-center justify-center'
 							onClick={router.back}
 						>
-							<ArrowLeft className='h-4 w-4' />
+							<ArrowLeft className='h-4 w-4 text-green-600 hover:text-green-700 hover:bg-green-50' />
 						</Button>
 
 						<Separator orientation='vertical' className='mr-2 h-4' />
@@ -317,7 +317,7 @@ const Module = observer(({ module }) => {
 									</BreadcrumbItem>
 									<BreadcrumbSeparator className='hidden md:block' />
 									<BreadcrumbItem>
-										<BreadcrumbPage>{moduleData?.title}</BreadcrumbPage>
+										<BreadcrumbPage>Просмотр модуля</BreadcrumbPage>
 									</BreadcrumbItem>
 								</BreadcrumbList>
 							</Breadcrumb>

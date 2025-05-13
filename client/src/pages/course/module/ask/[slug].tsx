@@ -51,6 +51,14 @@ import {
 	SidebarTrigger,
 } from '@/components/ui/sidebar'
 import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '@/components/ui/card'
+import {
 	deleteModule,
 	editTitleModule,
 	getModule,
@@ -238,7 +246,7 @@ const Ask = observer(({ ask }) => {
 							className='h-8 w-8 flex items-center justify-center'
 							onClick={router.back}
 						>
-							<ArrowLeft className='h-4 w-4' />
+							<ArrowLeft className='h-4 w-4 text-green-600 hover:text-green-700 hover:bg-green-50' />
 						</Button>
 
 						<Separator orientation='vertical' className='mr-2 h-4' />
@@ -269,7 +277,7 @@ const Ask = observer(({ ask }) => {
 									</BreadcrumbItem>
 									<BreadcrumbSeparator className='hidden md:block' />
 									<BreadcrumbItem>
-										<BreadcrumbPage>{askData?.title}</BreadcrumbPage>
+										<BreadcrumbPage>Просмотр вопроса</BreadcrumbPage>
 									</BreadcrumbItem>
 								</BreadcrumbList>
 							</Breadcrumb>
@@ -278,52 +286,49 @@ const Ask = observer(({ ask }) => {
 
 					<div className='flex flex-1 flex-col gap-6 p-6 bg-gray-50'>
 						{/* Заголовок вопроса с действиями */}
-						<div className='sticky top-16 z-20'>
-							<div className='rounded-lg bg-white shadow-md p-4 flex flex-row items-center justify-between'>
-								<h2 className='text-2xl font-bold text-primary'>
-									{askData?.title}
-								</h2>
-								<AlertDialog>
-									<AlertDialogTrigger asChild>
-										<Button
-											variant='outline'
-											size='icon'
-											className='text-red-500 border-red-200 hover:bg-red-50 mr-1'
-										>
-											<div className='flex-shrink-0 flex items-center justify-center w-8 h-8'>
-												<Trash2 className='h-4 w-4' />
-											</div>
-										</Button>
-									</AlertDialogTrigger>
-									<AlertDialogContent>
-										<AlertDialogHeader>
-											<AlertDialogTitle>Подтвердите удаление</AlertDialogTitle>
-											<AlertDialogDescription>
-												Данное действие нельзя будет отменить
-											</AlertDialogDescription>
-										</AlertDialogHeader>
-										<AlertDialogFooter>
-											<AlertDialogCancel>Отмена</AlertDialogCancel>
-											<AlertDialogAction
-												onClick={() => handleDeleteAsk()}
-												className={'bg-red-500 hover:bg-red-400'}
+						<Card className='border-none shadow-md sticky top-16 z-20'>
+							<CardHeader className='flex flex-row items-center justify-between pb-2'>
+								<div>
+									<CardTitle className='text-2xl font-bold text-primary'>
+										{askData?.title}
+									</CardTitle>
+								</div>
+								<div className='flex items-center gap-2'>
+									<AlertDialog>
+										<AlertDialogTrigger asChild>
+											<Button
+												variant='outline'
+												size='icon'
+												className='text-red-500 border-red-200 hover:bg-red-50'
 											>
-												Удалить
-											</AlertDialogAction>
-										</AlertDialogFooter>
-									</AlertDialogContent>
-								</AlertDialog>
-							</div>
-						</div>
-
-						{/* Содержимое вопроса */}
-						<div className='grid grid-cols-1 gap-6'>
-							{/* Форма редактирования названия */}
-							<div className='rounded-lg bg-white shadow-md p-5'>
-								<h3 className='text-lg font-medium mb-4 flex items-center gap-2'>
-									<Edit className='h-4 w-4 text-blue-500' />
-									Редактирование вопроса
-								</h3>
+												<div className='flex-shrink-0 flex items-center justify-center w-8 h-8'>
+													<Trash2 className='h-4 w-4' />
+												</div>
+											</Button>
+										</AlertDialogTrigger>
+										<AlertDialogContent>
+											<AlertDialogHeader>
+												<AlertDialogTitle>
+													Подтвердите удаление
+												</AlertDialogTitle>
+												<AlertDialogDescription>
+													Данное действие нельзя будет отменить
+												</AlertDialogDescription>
+											</AlertDialogHeader>
+											<AlertDialogFooter>
+												<AlertDialogCancel>Отмена</AlertDialogCancel>
+												<AlertDialogAction
+													onClick={() => handleDeleteAsk()}
+													className={'bg-red-500 hover:bg-red-400'}
+												>
+													Удалить
+												</AlertDialogAction>
+											</AlertDialogFooter>
+										</AlertDialogContent>
+									</AlertDialog>
+								</div>
+							</CardHeader>
+							<CardContent>
 								<Form {...methods}>
 									<form
 										onSubmit={methods.handleSubmit(onSubmit)}
@@ -361,8 +366,11 @@ const Ask = observer(({ ask }) => {
 										/>
 									</form>
 								</Form>
-							</div>
+							</CardContent>
+						</Card>
 
+						{/* Содержимое вопроса */}
+						<div className='grid grid-cols-1 gap-6'>
 							{/* Ответы на вопрос */}
 							<div className='rounded-lg bg-white shadow-md overflow-hidden'>
 								<div className='p-5 border-b'>
