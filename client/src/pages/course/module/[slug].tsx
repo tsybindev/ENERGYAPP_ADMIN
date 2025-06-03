@@ -1,90 +1,28 @@
 //@ts-ignore
 //@ts-nocheck
 
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
-import { z } from 'zod'
-import { toast } from 'sonner'
 import Cookies from 'js-cookie'
-import { observer } from 'mobx-react'
-import { SubmitHandler, useForm } from 'react-hook-form'
 import {
 	ArrowLeft,
-	Download,
-	PanelLeft,
-	Trash2,
-	X,
-	Edit,
 	BookOpen,
+	Edit,
 	HelpCircle,
 	Info,
+	Trash2,
+	X,
 } from 'lucide-react'
+import { observer } from 'mobx-react'
+import { SubmitHandler, useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { z } from 'zod'
 
-import Head from 'next/head'
-import Link from 'next/link'
-import { cn } from '@/lib/utils'
-import { useRouter } from 'next/router'
-import { Asks } from '@/lib/types/Asks'
-import { getAsks } from '@/lib/api/Asks'
-import { Input } from '@/components/ui/input'
-import { Modules } from '@/lib/types/Modules'
-import { Lessons } from '@/lib/types/Lessons'
-import { checkType } from '@/lib/api/CheckType'
-import { Button } from '@/components/ui/button'
-import StoreCourse from '@/lib/store/storeCourse'
-import AddAsk from '@/components/elements/AddAsk'
-import StoreModule from '@/lib/store/storeModules'
-import StoreCatalog from '@/lib/store/storeCatalog'
-import StoreLessons from '@/lib/store/storeLessons'
 import { AppSidebar } from '@/components/app-sidebar'
-import { Separator } from '@/components/ui/separator'
-import { zodResolver } from '@hookform/resolvers/zod'
-import AddModule from '@/components/elements/AddModule'
+import AddAsk from '@/components/elements/AddAsk'
 import AddLesson from '@/components/elements/AddLesson'
-import { httpErrorsSplit } from '@/utils/httpErrorsSplit'
-import ImageUpload from '@/components/elements/ImageUpload'
-import { CourseAddSchema } from '@/lib/schemas/CourseAddSchema'
-import {
-	deleteModule,
-	editTitleModule,
-	getModuleLessons,
-} from '@/lib/api/Modules'
-import {
-	SidebarInset,
-	SidebarProvider,
-	SidebarTrigger,
-} from '@/components/ui/sidebar'
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from '@/components/ui/form'
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from '@/components/ui/accordion'
-import {
-	Breadcrumb,
-	BreadcrumbItem,
-	BreadcrumbLink,
-	BreadcrumbList,
-	BreadcrumbPage,
-	BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
-import {
-	createCourse,
-	deleteCourse,
-	editTitleCourse,
-	getCourse,
-	getCourseModules,
-	uploadCourseImage,
-	uploadCourseTemplate,
-} from '@/lib/api/Courses'
+import AskCard from '@/components/elements/AskCard'
+import LessonCard from '@/components/elements/LessonCard'
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -97,15 +35,53 @@ import {
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import {
+	Breadcrumb,
+	BreadcrumbItem,
+	BreadcrumbLink,
+	BreadcrumbList,
+	BreadcrumbPage,
+	BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
+import { Button } from '@/components/ui/button'
+import {
 	Card,
 	CardContent,
 	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card'
-import LessonCard from '@/components/elements/LessonCard'
-import AskCard from '@/components/elements/AskCard'
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
+import {
+	SidebarInset,
+	SidebarProvider,
+	SidebarTrigger,
+} from '@/components/ui/sidebar'
+import { getAsks } from '@/lib/api/Asks'
+import { checkType } from '@/lib/api/CheckType'
+import {
+	deleteModule,
+	editTitleModule,
+	getModuleLessons,
+} from '@/lib/api/Modules'
+import { CourseAddSchema } from '@/lib/schemas/CourseAddSchema'
+import StoreCatalog from '@/lib/store/storeCatalog'
+import StoreModule from '@/lib/store/storeModules'
+import { Asks } from '@/lib/types/Asks'
+import { Lessons } from '@/lib/types/Lessons'
+import { httpErrorsSplit } from '@/utils/httpErrorsSplit'
+import { zodResolver } from '@hookform/resolvers/zod'
+import Head from 'next/head'
+import { useRouter } from 'next/router'
+import ImportAsks from '@/components/elements/ImportAsks'
 
 const Module = observer(({ module }) => {
 	const token = Cookies.get('users_access_token')
@@ -261,21 +237,21 @@ const Module = observer(({ module }) => {
 	const [asks, setAsks] = useState<Asks[]>([])
 	const [isAsksLoading, setIsAsksLoading] = useState<boolean>(true)
 
-	useEffect(() => {
-		const fetchAsks = async () => {
-			setIsAsksLoading(true)
-			try {
-				const response = await getAsks(token, moduleId) // Ожидаем завершения запроса
-				setAsks(response) // Устанавливаем данные
-			} catch (e) {
-				console.error('Ошибка при загрузке вопросов:', e) // Логируем ошибку
-			} finally {
-				setIsAsksLoading(false)
-			}
+	const fetchAsks = useCallback(async () => {
+		setIsAsksLoading(true)
+		try {
+			const response = await getAsks(token, moduleId) // Ожидаем завершения запроса
+			setAsks(response) // Устанавливаем данные
+		} catch (e) {
+			console.error('Ошибка при загрузке вопросов:', e) // Логируем ошибку
+		} finally {
+			setIsAsksLoading(false)
 		}
+	}, [token, moduleId])
 
-		fetchAsks() // Вызываем асинхронную функцию
-	}, [token, moduleId]) // Данные изменятся только при изменении token или moduleId
+	useEffect(() => {
+		fetchAsks()
+	}, [fetchAsks])
 
 	return (
 		<>
@@ -472,8 +448,9 @@ const Module = observer(({ module }) => {
 												Контрольные вопросы для проверки знаний
 											</CardDescription>
 										</div>
-										<div>
+										<div className='flex items-center gap-2'>
 											<AddAsk module_id={moduleId} />
+											<ImportAsks module_id={moduleId} onSuccess={fetchAsks} />
 										</div>
 									</CardHeader>
 								</div>

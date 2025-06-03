@@ -146,3 +146,21 @@ export async function editAsk(
 
 	return response.data
 }
+
+export async function createAsks(
+	token: string,
+	module_id: string,
+	asks: any[]
+) {
+	const response = await API.post(`/modules/${module_id}/test/asks/`, asks, {
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${token}`,
+		},
+		params: {
+			module_id: module_id,
+		},
+	})
+
+	return response.data
+}
