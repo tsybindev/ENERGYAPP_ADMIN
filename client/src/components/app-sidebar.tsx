@@ -37,6 +37,7 @@ import {
 	SidebarRail,
 } from '@/components/ui/sidebar'
 import AddCourse from '@/components/elements/AddCourse'
+import ImportUsers from '@/components/elements/ImportUsers'
 import { Separator } from '@/components/ui/separator'
 import { Input } from '@/components/ui/input'
 import {
@@ -99,6 +100,10 @@ export const AppSidebar = observer(
 
 					<SidebarGroup className={'mt-1'}>
 						<AddCourse />
+					</SidebarGroup>
+
+					<SidebarGroup className={'mt-1'}>
+						<ImportUsers />
 					</SidebarGroup>
 
 					<SidebarGroup className={'mt-1'}>

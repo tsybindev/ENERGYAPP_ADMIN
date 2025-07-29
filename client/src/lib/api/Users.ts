@@ -1,5 +1,7 @@
 import API from '../../../axiosConfig'
 import { ApiUser, ApiUserCourseAttempts } from '@/types/attempts'
+import { UserImport } from '../schemas/UserImportSchema'
+
 
 export async function getUsers(token: string) {
 	const response = await API.get<ApiUser[]>('/users/', {
@@ -43,6 +45,17 @@ export async function downloadUserAttempts(
 		responseType: 'blob',
 		paramsSerializer: {
 			indexes: null, // Это предотвратит добавление индексов к параметрам массива
+		},
+	})
+
+	return response.data
+}
+
+export async function createUsers(token: string, users: UserImport) {
+	const response = await API.post('/users/', users, {
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${token}`,
 		},
 	})
 
