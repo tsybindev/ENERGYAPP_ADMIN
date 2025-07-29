@@ -1,6 +1,6 @@
 //@ts-nocheck
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import API from '../../../axiosConfig'
 import { toast } from 'sonner'
@@ -33,6 +33,7 @@ export default function Editor({
 	token,
 	initialContent,
 }: EditorProps) {
+	const fileInputRef = useRef<HTMLInputElement>(null)
 	const onUploadImg = async (files: any, callback: any) => {
 		const res = await Promise.all(
 			files.map((file: any) => {
@@ -115,6 +116,59 @@ export default function Editor({
 		setContent(prevContent => `${prevContent}\n---\n`) // Вставляем "---" для горизонтальной линии
 	}
 
+	const handlePdfUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0]
+		if (!file) return
+
+		const toastId = toast.loading('Загрузка и обработка PDF...')
+
+		const formData = new FormData()
+		formData.append('file', file)
+
+		try {
+			const response = await API.post(`/lessons/parse_pdf/`, formData, {
+				headers: {
+					'Content-Type': 'multipart/form-data',
+					Authorization: `Bearer ${token}`,
+				},
+			})
+
+			if (response.data.content && typeof response.data.content === 'string') {
+				setContent(response.data.content)
+			} else {
+				console.error(
+					'Unexpected response content format:',
+					response.data.content
+				)
+				toast.error('Неизвестная ошибка от сервера.', {
+					id: toastId,
+				})
+				return
+			}
+
+			toast.success('PDF успешно обработан!', {
+				id: toastId,
+				duration: 5000,
+				richColors: true,
+			})
+		} catch (e) {
+			console.error('Ошибка загрузки PDF:', e)
+			toast.error(httpErrorsSplit(e), {
+				id: toastId,
+				duration: 5000,
+				richColors: true,
+			})
+		} finally {
+			if (fileInputRef.current) {
+				fileInputRef.current.value = ''
+			}
+		}
+	}
+
+	const triggerPdfUpload = () => {
+		fileInputRef.current?.click()
+	}
+
 	const toolbarsExclude = [
 		'underline',
 		'sup',
@@ -136,9 +190,25 @@ export default function Editor({
 				<Button onClick={insertHr} className='mr-2'>
 					Добавить разделитель страницы
 				</Button>
-				<Button className='' onClick={saveContent}>
-					Сохранить изменения
-				</Button>
+				<div className='flex'>
+					<Button
+						onClick={triggerPdfUpload}
+						className='mr-2'
+						variant='outline'
+					>
+						Загрузить PDF
+					</Button>
+					<Button className='' onClick={saveContent}>
+						Сохранить изменения
+					</Button>
+					<input
+						type='file'
+						ref={fileInputRef}
+						onChange={handlePdfUpload}
+						style={{ display: 'none' }}
+						accept='application/pdf'
+					/>
+				</div>
 			</div>
 
 			<MdEditor
