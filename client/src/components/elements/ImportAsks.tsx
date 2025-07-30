@@ -121,10 +121,13 @@ const ImportAsks = ({ ...props }: ComponentProps) => {
 				type='file'
 				accept='.json'
 				onChange={handleFileImport}
-				className='absolute inset-0 opacity-0 cursor-pointer'
+				className='hidden'
 				disabled={isLoading}
 			/>
-			<Button className='w-full' disabled={isLoading}>
+			<Button className='w-full' 
+				disabled={isLoading}
+				onClick={()=> fileInputRef.current?.click()}
+			>
 				<Import className='h-4 w-4' />
 				Импорт из файла
 			</Button>
