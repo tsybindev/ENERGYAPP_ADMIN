@@ -45,6 +45,7 @@
 		"next": "14.2.20",
 		"next-themes": "^0.4.4",
 		"nookies": "^2.5.2",
+		"papaparse": "^5.5.3",
 		"quill-better-table": "^1.2.10",
 		"quill-delta-to-markdown": "^0.6.0",
 		"react": "^18",
@@ -61,6 +62,7 @@
 	"devDependencies": {
 		"@types/js-cookie": "^3.0.6",
 		"@types/node": "^20",
+		"@types/papaparse": "^5.5.1",
 		"@types/react": "^18",
 		"@types/react-dom": "^18",
 		"@types/turndown": "^5.0.5",
