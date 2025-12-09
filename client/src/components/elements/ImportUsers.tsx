@@ -31,6 +31,7 @@ const ImportUsers = ({ ...props }: ComponentProps) => {
 			Papa.parse(file, {
 				header: true,
 				skipEmptyLines: true,
+				delimiter: ';',
 				complete: async results => {
 					let validatedData
 					try {
@@ -57,7 +58,6 @@ const ImportUsers = ({ ...props }: ComponentProps) => {
 						if (!token) {
 							throw new Error('Токен не найден')
 						}
-						console.log(validatedData)
 						await createUsers(token, validatedData)
 						toast.success('Пользователи успешно импортированы!', {
 							id: toastId,
