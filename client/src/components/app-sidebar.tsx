@@ -111,7 +111,7 @@ export const AppSidebar = observer(
 									<PassingPercentSettings />
 								</SidebarMenuItem>
 							</TooltipTrigger>
-							<TooltipContent>
+							<TooltipContent side='right'>
 								<p>Настроить проходной процент для экзамена</p>
 							</TooltipContent>
 						</Tooltip>
@@ -122,7 +122,7 @@ export const AppSidebar = observer(
 									<AddCourse />
 								</SidebarGroup>
 							</TooltipTrigger>
-							<TooltipContent>
+							<TooltipContent side='right'>
 								<p>
 									Создание нового курса, <br /> будет доступен в списке программ
 								</p>
@@ -135,7 +135,7 @@ export const AppSidebar = observer(
 									<ImportUsers />
 								</SidebarGroup>
 							</TooltipTrigger>
-							<TooltipContent>
+							<TooltipContent side='right'>
 								<p>Добавить группу пользователей из csv файла</p>
 							</TooltipContent>
 						</Tooltip>
