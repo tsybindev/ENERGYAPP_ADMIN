@@ -2,6 +2,7 @@ import { makeAutoObservable } from 'mobx'
 import Cookies from 'js-cookie'
 import { Course } from '@/types/attempts'
 import { getUsers, getUserAttempts } from '@/lib/api/Users'
+import { deleteAttempt as apiDeleteAttempt } from '@/lib/api/Attempts'
 
 class StoreAttempts {
 	isLoad = true
@@ -62,12 +63,39 @@ class StoreAttempts {
 					attempts: course.exam.map(attempt => ({
 						id: attempt.item_id,
 						date: attempt.date_create,
+						is_completed: attempt.is_completed,
 					})),
 				}))
 			)
 		} catch (error) {
 			this.setError('Ошибка при загрузке курсов пользователя')
 			console.error(error)
+		} finally {
+			this.setLoading(false)
+		}
+	}
+
+	async deleteAttempt(attemptId: string) {
+		try {
+			this.setLoading(true)
+			this.setError(null)
+			const token = Cookies.get('users_access_token')
+			if (!token) {
+				throw new Error('No token found')
+			}
+
+			await apiDeleteAttempt(token, attemptId)
+
+			this.setUserCourses(
+				this.userCourses.map(course => ({
+					...course,
+					attempts: course.attempts.filter(attempt => attempt.id !== attemptId),
+				}))
+			)
+		} catch (error) {
+			this.setError('Ошибка при аннулировании попытки')
+			console.error(error)
+			throw error
 		} finally {
 			this.setLoading(false)
 		}

@@ -137,6 +137,7 @@ const ImportUsers = ({ ...props }: ComponentProps) => {
 			<Input
 				ref={fileInputRef}
 				type='file'
+				title=''
 				accept='.csv'
 				onChange={handleFileImport}
 				className='absolute inset-0 opacity-0 cursor-pointer'

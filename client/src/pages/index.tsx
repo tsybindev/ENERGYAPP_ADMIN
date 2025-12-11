@@ -196,6 +196,23 @@ const Home = observer(() => {
 									checkedAttempts={checkedAttempts}
 									onToggle={handleToggleAttempt}
 									isLoading={storeAttempts.loading}
+									onDeleteAttempt={async attemptId => {
+										const toastId = toast.loading('Аннулирование экзамена...')
+										try {
+											await storeAttempts.deleteAttempt(attemptId)
+											toast.success('Экзамен успешно аннулирован', {
+												id: toastId,
+												duration: 5000,
+												richColors: true,
+											})
+										} catch (error) {
+											toast.error('Не удалось аннулировать экзамен', {
+												id: toastId,
+												duration: 5000,
+												richColors: true,
+											})
+										}
+									}}
 								/>
 							) : (
 								<div className='text-center text-gray-500 py-8'>

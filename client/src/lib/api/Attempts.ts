@@ -14,3 +14,12 @@ export async function getAttemptPhotos(token: string, attemptId: string) {
 
 	return response.data
 }
+
+export async function deleteAttempt(token: string, attemptId: string) {
+	const response = await API.delete(`/attempts/${attemptId}/`, {
+		headers: {
+			Authorization: `Bearer ${token}`,
+		},
+	})
+	return response.data
+}
