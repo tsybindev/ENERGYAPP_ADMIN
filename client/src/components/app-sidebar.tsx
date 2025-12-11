@@ -107,9 +107,9 @@ export const AppSidebar = observer(
 
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<SidebarMenuItem>
+								<SidebarGroup className={'mt-1'}>
 									<PassingPercentSettings />
-								</SidebarMenuItem>
+								</SidebarGroup>
 							</TooltipTrigger>
 							<TooltipContent side='right'>
 								<p>Настроить проходной процент для экзамена</p>

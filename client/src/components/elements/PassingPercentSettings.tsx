@@ -19,10 +19,10 @@ const PassingPercentSettings = observer(() => {
 	return (
 		<Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
 			<SheetTrigger asChild>
-				<button className='w-full mb-2 flex items-center text-sm justify-center border border-border hover:bg-gray-200 rounded-md py-1.5'>
-					<Percent className='mr-2 h-4 w-4' />
+				<Button className='w-full'>
+					<Percent className='h-4 w-4' />
 					Проходной процент
-				</button>
+				</Button>
 			</SheetTrigger>
 			<SheetContent>
 				<PassingPercentForm onSuccess={handleSuccess} />
