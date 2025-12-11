@@ -39,13 +39,17 @@ class SettingsStore {
 			if (token) {
 				await updateExamPercent(newPercent, token)
 				this.percent = newPercent
-				toast.success('Проходной процент успешно обновлен!')
+				toast.success('Проходной процент успешно обновлен!', {
+					duration: 5000,
+					richColors: true,
+				})
 			}
 		} catch (error: any) {
 			const err = httpErrorsSplit(error)
 			this.error = err
 			toast.error(err, {
 				duration: 5000,
+				richColors: true,
 			})
 			throw new Error(err)
 		} finally {
