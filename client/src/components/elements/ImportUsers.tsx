@@ -28,7 +28,10 @@ const ImportUsers = ({ ...props }: ComponentProps) => {
 		const toastId = toast.loading('Импорт пользователей из файла...')
 
 		try {
-			Papa.parse(file, {
+			const buffer = await file.arrayBuffer()
+			const decoder = new TextDecoder('windows-1251')
+			const text = decoder.decode(buffer)
+			Papa.parse(text, {
 				header: true,
 				skipEmptyLines: true,
 				delimiter: ';',
@@ -98,7 +101,7 @@ const ImportUsers = ({ ...props }: ComponentProps) => {
 						}
 					}
 				},
-				error: error => {
+				error: (error: any) => {
 					toast.error(`Ошибка при парсинге CSV: ${error.message}`, {
 						id: toastId,
 						duration: 5000,
