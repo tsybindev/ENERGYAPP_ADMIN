@@ -30,7 +30,6 @@ import {
 	SidebarGroupContent,
 	SidebarGroupLabel,
 	SidebarMenu,
-	SidebarMenuBadge,
 	SidebarMenuButton,
 	SidebarMenuItem,
 	SidebarMenuSub,
@@ -58,6 +57,7 @@ import {
 	TooltipTrigger,
 } from '@/components/ui/tooltip'
 import Profile from '@/components/elements/Profile'
+import PassingPercentSettings from './elements/PassingPercentSettings'
 
 export const AppSidebar = observer(
 	({ ...props }: React.ComponentProps<typeof Sidebar>) => {
@@ -104,6 +104,18 @@ export const AppSidebar = observer(
 						</SidebarGroup>
 
 						<Separator />
+
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<SidebarMenuItem>
+									<PassingPercentSettings />
+								</SidebarMenuItem>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>Настроить проходной процент для экзамена</p>
+							</TooltipContent>
+						</Tooltip>
+
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<SidebarGroup className={'mt-1'}>
