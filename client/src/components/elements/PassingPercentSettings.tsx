@@ -37,9 +37,7 @@ const PassingPercentForm = observer(
 		const [newPercent, setNewPercent] = useState<string>('')
 
 		useEffect(() => {
-			if (storeSettings.percent === null) {
-				fetchPercent()
-			}
+			fetchPercent()
 		}, [fetchPercent])
 
 		useEffect(() => {

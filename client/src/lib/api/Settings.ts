@@ -13,8 +13,8 @@ export async function getExamPercent(token: string) {
 
 export async function updateExamPercent(percent: number, token: string) {
 	const response = await API.post(
-		'/settings/exam_percent/',
-		{ percent },
+		`/settings/exam_percent/${percent}/`,
+		{},
 		{
 			headers: {
 				'Content-Type': 'application/json',
