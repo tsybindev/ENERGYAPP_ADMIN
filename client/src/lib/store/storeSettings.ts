@@ -8,19 +8,25 @@ class SettingsStore {
 	percent: number | null = null
 	isLoading: boolean = false
 	error: string | null = null
+	hasFetched = false
 
 	constructor() {
 		makeAutoObservable(this)
 	}
 
 	fetchPercent = async () => {
+		if (this.hasFetched || this.isLoading) return
+
 		this.isLoading = true
 		this.error = null
 		const token = Cookies.get('users_access_token')
 		try {
 			if (token) {
 				const response = await getExamPercent(token)
-				this.percent = response.data.percent
+				if (response && response.length > 0) {
+					this.percent = response[0].pass_perc
+					this.hasFetched = true
+				}
 			}
 		} catch (error: any) {
 			const err = httpErrorsSplit(error)

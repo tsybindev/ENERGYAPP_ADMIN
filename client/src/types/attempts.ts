@@ -16,7 +16,7 @@ export type Course = {
 	attempts: {
 		id: string
 		date: string
-		is_completed: boolean
+		passed: boolean
 	}[]
 }
 
@@ -60,7 +60,7 @@ export type ApiCourse = {
 export type ApiAttempt = {
 	item_id: string
 	date_create: string
-	is_completed: boolean
+	passed: boolean
 }
 
 export type ApiAttemptPhoto = AttemptPhoto[]
