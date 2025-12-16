@@ -135,7 +135,7 @@ export const CoursesAccordion: React.FC<CoursesAccordionProps> = ({
 												<Tooltip>
 													<TooltipTrigger asChild>
 														<span className='flex items-center gap-1 text-sm'>
-															{attempt.is_completed ? (
+															{attempt.passed ? (
 																<BookCheck className='w-4 h-4 text-green-600' />
 															) : (
 																<BookX className='w-4 h-4 text-red-600' />
@@ -152,7 +152,7 @@ export const CoursesAccordion: React.FC<CoursesAccordionProps> = ({
 													</TooltipTrigger>
 													<TooltipContent>
 														<p>
-															{attempt.is_completed
+															{attempt.passed
 																? 'Экзамен сдан'
 																: 'Экзамен не сдан'}
 														</p>
@@ -162,7 +162,7 @@ export const CoursesAccordion: React.FC<CoursesAccordionProps> = ({
 													<Tooltip>
 														<TooltipTrigger asChild>
 															<AlertDialogTrigger asChild>
-																{attempt.is_completed && (
+																{attempt.passed && (
 																	<ShieldMinus className='w-4 h-4 text-red-600 cursor-pointer' />
 																)}
 															</AlertDialogTrigger>
